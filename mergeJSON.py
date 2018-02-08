@@ -1,12 +1,20 @@
-import json, os, os.path;
+import json, os, os.path, glob;
 
-length = len(os.listdir('.'));
+# length = len(os.listdir('./data'));
 allData = [];
-print length
-for x in xrange (1, length + 1):
-    print x
 
+jsonLength = len(glob.glob1("./data", "*.json"))
+print jsonLength
 
-with open('1.json') as json_data:
-    d = json.load(json_data)
-    print (d)
+for x in xrange (1, jsonLength + 1):
+    path = "./data/JSON" + str(x) + ".json"
+    with open(path) as json_data:
+        data = json.load(json_data)
+        allData.append(data)
+
+# print allData
+print len(allData)
+
+# with open('1.json') as json_data:
+#     d = json.load(json_data)
+#     print (d)
