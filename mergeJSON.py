@@ -1,31 +1,53 @@
 import json, os, os.path, glob;
 from datetime import datetime
 
-# length = len(os.listdir('./data'));
 allData = [];
 devDict = {};
 
 jsonLength = len(glob.glob1("./data", "*.json"))
-print jsonLength
 
 for x in xrange (1, jsonLength + 1):
     path = "./data/JSON" + str(x) + ".json"
     with open(path) as json_data:
         data = json.load(json_data)
-        # creates key in dictionary for each device
-        
+        # creates key in dictionary for each device with a different Serial Number
         if data['SerialNumber'] not in devDict:
-            time = data['TimeCreated'][:-6]
-            print datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f')
-            
             devDict[data['SerialNumber']] = [data];
-        else: 
+        else:
             devDict[data['SerialNumber']].append(data);
         allData.append(data)
 
-# for each serial number in the dictionary it creates a file with the associated impacts
-for key in devDict:
-    f = open(key + '.json', "w+")
-    f.write(json.dumps(devDict[key], ensure_ascii=False));
+sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
+
+
+def createJSONFiles(sortedData, devDict):
+    f = open('sorted.json', 'w+')
+    f.write(json.dumps(sortedData, ensure_ascii = False))
     f.close();
-print len(allData)
+    # prints dictionary for each device with different serial number
+    for key in devDict:
+        f = open(key + '.json', 'w+')
+        f.write(json.dumps(devDict[key], ensure_ascii=False));
+        f.close();
+
+def createImpactFiles(sortedData):
+    impact = 0;
+    count = 1;
+    lastCut = 0;
+    lastTime = datetime.strptime(sortedData[lastCut]['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f')
+    while count < len(sortedData):
+        currentTime = datetime.strptime(sortedData[count]['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f')
+        diff = currentTime-lastTime
+        if diff.total_seconds() > 1:
+            impact += 1
+            f = open('impact' + str(impact) + '.json', 'w+')
+            f.write(json.dumps(sortedData[lastCut:count], ensure_ascii = False))
+            f.close()
+            # print count, "index"
+            # print sortedData[lastCut:count]
+            lastCut = count;
+            count += 1
+            lastTime = currentTime
+
+# createJSONFiles(sortedData, devDict)
+# createImpactFiles(sortedData)
