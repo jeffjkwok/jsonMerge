@@ -19,18 +19,25 @@ for x in xrange (1, jsonLength + 1):
 
 sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
 
+def createFoldersAndFiles(folderName, sortedData, devDict):
+    path = "./" + folderName
+    if not os.path.exists(path):
+        os.makedirs(path)
+    createJSONFiles(sortedData, devDict, path)
+    createImpactFiles(sortedData, path)
+    print "Finished Printing"
 
-def createJSONFiles(sortedData, devDict):
-    f = open('sorted.json', 'w+')
+def createJSONFiles(sortedData, devDict, path):
+    f = open( path + '/sorted.json', 'w+')
     f.write(json.dumps(sortedData, ensure_ascii = False))
     f.close();
     # prints dictionary for each device with different serial number
     for key in devDict:
-        f = open(key + '.json', 'w+')
+        f = open(path + '/' + key + '.json', 'w+')
         f.write(json.dumps(devDict[key], ensure_ascii=False));
         f.close();
 
-def createImpactFiles(sortedData):
+def createImpactFiles(sortedData, path):
     impact = 0;
     count = 1;
     lastCut = 0;
@@ -40,14 +47,13 @@ def createImpactFiles(sortedData):
         diff = currentTime-lastTime
         if diff.total_seconds() > 1:
             impact += 1
-            f = open('impact' + str(impact) + '.json', 'w+')
+            f = open( path + '/impact' + str(impact) + '.json', 'w+')
             f.write(json.dumps(sortedData[lastCut:count], ensure_ascii = False))
             f.close()
             # print count, "index"
             # print sortedData[lastCut:count]
-            lastCut = count;
-            count += 1
-            lastTime = currentTime
+        lastCut = count;
+        count += 1
+        lastTime = currentTime
 
-# createJSONFiles(sortedData, devDict)
-# createImpactFiles(sortedData)
+createFoldersAndFiles('testfolder', sortedData, devDict)
