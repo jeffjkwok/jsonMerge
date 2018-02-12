@@ -43,7 +43,6 @@ def createImpactFiles(sortedData, path):
         count += 1
         lastTime = currentTime
 
-
 # CODE BEING RUN
 allData = [];
 devDict = {};
