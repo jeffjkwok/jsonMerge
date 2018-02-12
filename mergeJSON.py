@@ -31,17 +31,32 @@ def createImpactFiles(sortedData, path):
     count = 1;
     lastCut = 0;
     lastTime = datetime.strptime(sortedData[lastCut]['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f')
+    print len(sortedData)
     while count < len(sortedData):
         currentTime = datetime.strptime(sortedData[count]['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f')
         diff = currentTime-lastTime
         if diff.total_seconds() > 1:
             impact += 1
-            f = open( path + '/impact' + str(impact) + '.json', 'w+')
-            f.write(json.dumps(sortedData[lastCut:count], ensure_ascii = False, indent = 4))
-            f.close()
-            lastCut = count
+            impactPath = path + '/impact' + str(impact) + '.json';
+            if not os.path.exists(impactPath):
+                f = open( impactPath, 'w+')
+                f.write(json.dumps(sortedData[lastCut:count], ensure_ascii = False, indent = 4))
+                f.close()
+                lastCut = count
         count += 1
         lastTime = currentTime
+    # Check for last Impact
+    if count == len(sortedData):
+        lastImpactCount = count;
+        while diff.total_seconds() < 1:
+            prevTime = datetime.strptime(sortedData[lastImpactCount-1]['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f')
+            diff = lastTime-prevTime
+            lastTime = prevTime
+            lastImpactCount -= 1
+    f = open( path + '/impact' + str(impact+1) + '.json', 'w+')
+    f.write(json.dumps(sortedData[lastImpactCount+1:len(sortedData)], ensure_ascii = False, indent = 4))
+    f.close()
+
 
 # CODE BEING RUN
 allData = [];
@@ -59,4 +74,4 @@ for filename in os.listdir('./data'):
                 allData.append(data)
 
 sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
-createFoldersAndFiles('xenithTestData', sortedData, devDict)
+createFoldersAndFiles('riddellTestData', sortedData, devDict)
