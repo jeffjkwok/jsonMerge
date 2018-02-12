@@ -1,23 +1,7 @@
 import json, os, os.path, glob;
 from datetime import datetime;
 
-
-allData = [];
-devDict = {};
-for filename in os.listdir('./data'):
-    if filename.endswith('.json'):
-        path = './data/' + filename
-        with open(path) as json_data:
-                data = json.load(json_data)
-                # creates key in dictionary for each device with a different Serial Number
-                if data['SerialNumber'] not in devDict:
-                    devDict[data['SerialNumber']] = [data];
-                else:
-                    devDict[data['SerialNumber']].append(data);
-                allData.append(data)
-
-sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
-
+#FUNCTIONS
 # Takes a folder name and creates that folder with sorted data
 def createFoldersAndFiles(folderName, sortedData, devDict):
     path = "./" + folderName
@@ -59,4 +43,21 @@ def createImpactFiles(sortedData, path):
         count += 1
         lastTime = currentTime
 
-createFoldersAndFiles('testfolder', sortedData, devDict)
+
+# CODE BEING RUN
+allData = [];
+devDict = {};
+for filename in os.listdir('./data'):
+    if filename.endswith('.json'):
+        path = './data/' + filename
+        with open(path) as json_data:
+                data = json.load(json_data)
+                # creates key in dictionary for each device with a different Serial Number
+                if data['SerialNumber'] not in devDict:
+                    devDict[data['SerialNumber']] = [data];
+                else:
+                    devDict[data['SerialNumber']].append(data);
+                allData.append(data)
+
+sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
+createFoldersAndFiles('xenithTestData', sortedData, devDict)
