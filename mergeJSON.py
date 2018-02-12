@@ -1,41 +1,46 @@
 import json, os, os.path, glob;
-from datetime import datetime
+from datetime import datetime;
+
 
 allData = [];
 devDict = {};
-
-jsonLength = len(glob.glob1("./data", "*.json"))
-
-for x in xrange (1, jsonLength + 1):
-    path = "./data/JSON" + str(x) + ".json"
-    with open(path) as json_data:
-        data = json.load(json_data)
-        # creates key in dictionary for each device with a different Serial Number
-        if data['SerialNumber'] not in devDict:
-            devDict[data['SerialNumber']] = [data];
-        else:
-            devDict[data['SerialNumber']].append(data);
-        allData.append(data)
+for filename in os.listdir('./data'):
+    if filename.endswith('.json'):
+        path = './data/' + filename
+        with open(path) as json_data:
+                data = json.load(json_data)
+                # creates key in dictionary for each device with a different Serial Number
+                if data['SerialNumber'] not in devDict:
+                    devDict[data['SerialNumber']] = [data];
+                else:
+                    devDict[data['SerialNumber']].append(data);
+                allData.append(data)
 
 sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
 
+# Takes a folder name and creates that folder with sorted data
 def createFoldersAndFiles(folderName, sortedData, devDict):
     path = "./" + folderName
     if not os.path.exists(path):
         os.makedirs(path)
     createJSONFiles(sortedData, devDict, path)
     createImpactFiles(sortedData, path)
-    print "Finished Printing"
+    print "Finished Creating Files and Folders"
 
 def createJSONFiles(sortedData, devDict, path):
-    f = open( path + '/sorted.json', 'w+')
-    f.write(json.dumps(sortedData, ensure_ascii = False))
-    f.close();
+    # creates a sorted JSON file
+    sortedPath = path + '/sorted.json';
+    if not os.path.exists(sortedPath):
+        f = open( sortedPath, 'w+')
+        f.write(json.dumps(sortedData, ensure_ascii = False, indent = 4))
+        f.close();
     # prints dictionary for each device with different serial number
     for key in devDict:
-        f = open(path + '/' + key + '.json', 'w+')
-        f.write(json.dumps(devDict[key], ensure_ascii=False));
-        f.close();
+        serialPath = path + '/' + key + '.json'
+        if not os.path.exists(serialPath):
+            f = open(serialPath, 'w+')
+            f.write(json.dumps(devDict[key], ensure_ascii = False, indent = 4));
+            f.close();
 
 def createImpactFiles(sortedData, path):
     impact = 0;
@@ -48,11 +53,9 @@ def createImpactFiles(sortedData, path):
         if diff.total_seconds() > 1:
             impact += 1
             f = open( path + '/impact' + str(impact) + '.json', 'w+')
-            f.write(json.dumps(sortedData[lastCut:count], ensure_ascii = False))
+            f.write(json.dumps(sortedData[lastCut:count], ensure_ascii = False, indent = 4))
             f.close()
-            # print count, "index"
-            # print sortedData[lastCut:count]
-        lastCut = count;
+            lastCut = count
         count += 1
         lastTime = currentTime
 
