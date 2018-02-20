@@ -74,4 +74,4 @@ for filename in os.listdir('./data'):
                 allData.append(data)
 
 sortedData = sorted(allData, key = lambda x: datetime.strptime(x['TimeCreated'][:-6], '%Y-%m-%dT%H:%M:%S.%f'))
-createFoldersAndFiles('riddellTestData', sortedData, devDict)
+createFoldersAndFiles('VicisTestData', sortedData, devDict)
